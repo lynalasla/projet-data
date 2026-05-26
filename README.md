@@ -34,45 +34,43 @@
 
 ## 📖 Description
 
-Ce projet conçoit une **infrastructure Data Cloud complète** autour du marché de l'emploi Data. Il combine collecte automatisée via API et scraping web, transformation et nettoyage des données en Python, stockage sur **AWS S3** (Data Lake) et **PostgreSQL RDS** (Data Warehouse), puis visualisation dans un dashboard interactif Plotly.
+Ce projet conçoit une **infrastructure Data Cloud complète** autour du marché de l'emploi Data. Il combine collecte automatisée via API, transformation et nettoyage des données en Python, stockage sur **AWS S3** (Data Lake) et **PostgreSQL RDS** (Data Warehouse), puis visualisation dans un dashboard interactif Plotly.
 
 > 🎯 **Objectif** : reproduire un pipeline ETL moderne conforme aux standards du Data Engineering et du Cloud Computing.
 
 ---
 
 ## 🏗️ Architecture
-
-```
 ┌─────────────────────────────────────────────────────────────┐
 │                     SOURCES DE DONNÉES                       │
-│        API Offres d'emploi  +  Web Scraping                  │
+│           API Adzuna  +  API Remotive (remote jobs)          │
 └─────────────────────┬───────────────────────────────────────┘
-                      │
-                      ▼
+│
+▼
 ┌─────────────────────────────────────────────────────────────┐
 │                  PIPELINE ETL (Python)                        │
 │   Collecte (api.py / scrape.py) → Transform → Load           │
 └─────────────────────┬───────────────────────────────────────┘
-                      │
-                      ▼
+│
+▼
 ┌─────────────────────────────────────────────────────────────┐
 │               CONTENEURISATION (Docker)                       │
 │         Dockerfile + docker-compose.yml                      │
+│    Lance automatiquement : transform.py → to_s3.py           │
 └──────────┬──────────────────────────┬───────────────────────┘
-           │                          │
-           ▼                          ▼
+│                          │
+▼                          ▼
 ┌──────────────────┐      ┌──────────────────────────┐
 │   AWS S3         │      │   AWS RDS PostgreSQL      │
 │   (Data Lake)    │      │   (Data Warehouse)        │
 │  Données brutes  │      │  Données structurées      │
 └──────────────────┘      └────────────┬─────────────┘
-                                       │
-                                       ▼
-                          ┌────────────────────────┐
-                          │  Dashboard Plotly/HTML  │
-                          │  KPIs · Filtres · Graphs│
-                          └────────────────────────┘
-```
+│
+▼
+┌────────────────────────┐
+│  Dashboard Plotly/HTML  │
+│  KPIs · Filtres · Graphs│
+└────────────────────────┘
 
 ---
 
@@ -93,17 +91,15 @@ Ce projet conçoit une **infrastructure Data Cloud complète** autour du marché
 ---
 
 ## 📁 Structure du projet
-
-```
 projet-data/
 │
 ├── 📂 aws/                         # Configuration infrastructure AWS
 │   ├── iam_policy.json             # Politiques IAM (permissions)
-│   ├── rds_schema.sql              # Schéma de la base PostgreSQL
+│   ├── rds_schema.sql              # Schéma prévu pour les prochaines améliorations
 │   └── s3_config.md                # Configuration du bucket S3
 │
 ├── 📂 dashboard/                   # Application de visualisation
-│   ├── app.py                      # Serveur Flask/Dash
+│   ├── app.py                      # Génération du dashboard HTML
 │   ├── dashboard.html              # Interface principale
 │   ├── logo-dark.svg               # Logo (thème sombre)
 │   └── logo-light.svg              # Logo (thème clair)
@@ -112,8 +108,8 @@ projet-data/
 │   ├── processed/
 │   │   └── jobs_clean.csv          # Données nettoyées et transformées
 │   └── raw/
-│       ├── api_jobs.csv            # Données brutes issues de l'API
-│       └── scrape_jobs.csv         # Données brutes issues du scraping
+│       ├── api_jobs.csv            # Données brutes issues de l'API Adzuna
+│       └── scrape_jobs.csv         # Données brutes issues de l'API Remotive
 │
 ├── 📂 etl/                         # Modules ETL (chargement)
 │   ├── check_rds.py                # Vérification connexion RDS
@@ -126,9 +122,9 @@ projet-data/
 │   └── analysis.ipynb              # Analyses exploratoires (EDA)
 │
 ├── 📂 scripts/                     # Scripts principaux ETL
-│   ├── api.py                      # Collecte via API
+│   ├── api.py                      # Collecte via API Adzuna
 │   ├── main.py                     # Point d'entrée du pipeline
-│   ├── scrape.py                   # Web scraping
+│   ├── scrape.py                   # Collecte via API Remotive
 │   └── transform.py                # Nettoyage et transformation
 │
 ├── Dockerfile                      # Image Docker du projet
@@ -136,7 +132,6 @@ projet-data/
 ├── requirements.txt                # Dépendances Python
 ├── .env                            # Variables d'environnement (non versionné)
 └── README.md                       # Documentation du projet
-```
 
 ---
 
@@ -154,13 +149,15 @@ projet-data/
 ```env
 AWS_ACCESS_KEY_ID=your_access_key
 AWS_SECRET_ACCESS_KEY=your_secret_key
-AWS_REGION=eu-west-1
+AWS_DEFAULT_REGION=eu-north-1
 S3_BUCKET_NAME=your-bucket-name
 RDS_HOST=your-rds-endpoint.rds.amazonaws.com
 RDS_PORT=5432
-RDS_DB=projet_data
+RDS_DB=jobsdb
 RDS_USER=your_user
 RDS_PASSWORD=your_password
+ADZUNA_APP_ID=your_app_id
+ADZUNA_APP_KEY=your_app_key
 ```
 
 ### 1. Cloner le dépôt
@@ -170,58 +167,63 @@ git clone https://github.com/lynalasla/projet-data.git
 cd projet-data
 ```
 
-### 2. Créer un environnement virtuel
+### 2. Étape préalable — Collecte des données
+
+Avant de lancer Docker, exécuter la collecte manuellement :
 
 ```bash
 python -m venv .venv
+.venv\Scripts\activate      # Windows
+source .venv/bin/activate   # Linux / Mac
 
-# Windows
-.venv\Scripts\activate
-
-# Linux / Mac
-source .venv/bin/activate
-```
-
-### 3. Installer les dépendances
-
-```bash
 pip install -r requirements.txt
+
+python scripts/api.py
+python scripts/scrape.py
 ```
 
-### 4. Lancer avec Docker
+### 3. Lancer le pipeline avec Docker
 
 ```bash
 docker compose up --build
 ```
 
-> Le pipeline collecte, transforme et charge automatiquement les données vers **AWS S3** et **PostgreSQL RDS**.
+> Docker lance automatiquement `transform.py` puis `to_s3.py` pour transformer et envoyer les données vers **AWS S3**.
+
+### 4. Lancer le dashboard
+
+```bash
+python dashboard/app.py
+start dashboard/dashboard.html
+```
 
 ---
 
 ## 🔄 Pipeline ETL
 
-Le pipeline est orchestré par `scripts/main.py` et se déroule en 3 phases :
+Le pipeline se déroule en 3 phases :
 
 ### 1. Extract — Collecte des données
 
 | Source | Script | Méthode |
 |--------|--------|---------|
-| API offres d'emploi | `api.py` | Requêtes HTTP / JSON |
-| Sites web | `scrape.py` | BeautifulSoup / Selenium |
+| API Adzuna | `scripts/api.py` | Requêtes HTTP / JSON |
+| API Remotive | `scripts/scrape.py` | Requêtes HTTP / JSON |
 
 ### 2. Transform — Nettoyage & enrichissement
 
 Géré par `scripts/transform.py` :
-- Suppression des doublons et valeurs nulles
-- Normalisation des intitulés de poste et des localisations
-- Extraction des compétences depuis les descriptions (NLP basique)
-- Uniformisation des formats de dates
+- Fusion des deux sources de données
+- Suppression des doublons
+- Normalisation des intitulés de poste
+- Détection du niveau d'expérience (junior / mid / senior)
+- Calcul de la longueur des titres de poste
 
 ### 3. Load — Chargement vers le Cloud
 
 | Destination | Script | Format |
 |-------------|--------|--------|
-| AWS S3 (Data Lake) | `etl/to_s3.py` | CSV brut |
+| AWS S3 (Data Lake) | `etl/to_s3.py` | CSV |
 | PostgreSQL RDS | `etl/load_to_rds.py` | Tables relationnelles |
 
 ---
@@ -232,24 +234,24 @@ Le dashboard, construit avec **Plotly** et **HTML/CSS/JS**, offre :
 
 | Fonctionnalité | Description |
 |----------------|-------------|
-| 📈 KPIs dynamiques | Nombre d'offres, entreprises, localisations uniques |
-| 🔍 Filtres interactifs | Par localisation, niveau de poste, compétence |
-| 📉 Graphiques dynamiques | Barres, camemberts, heatmaps |
-| 🏢 Top entreprises | Classement des recruteurs actifs |
-| 🗺️ Carte des offres | Distribution géographique |
-| 🧠 Analyse des compétences | Nuage de mots et fréquences |
+| 📈 KPIs dynamiques | Nombre d'offres, entreprises, localisations, sources |
+| 🔍 Filtres interactifs | Par localisation et par entreprise |
+| 📊 Graphiques dynamiques | Barres, camemberts, histogrammes |
+| 🏢 Top entreprises | Classement des recruteurs les plus actifs |
+| 🌍 Top localisations | Répartition géographique des offres |
+| 🧠 Analyse des compétences | Détection de Python, SQL, AWS, AI dans les titres |
+| 🌙 Thème dark / light | Bascule dynamique sans rechargement |
 
 ---
 
 ## 🔍 Analyses réalisées
 
-Les analyses sont documentées dans `notebooks/analysis.ipynb` :
-
 - **Entreprises qui recrutent le plus** — classement des sociétés les plus actives
-- **Localisations des offres** — répartition géographique (Paris, Lyon, remote…)
-- **Niveaux de postes** — junior / confirmé / senior / lead
-- **Compétences recherchées** — Python, SQL, Power BI, Spark, etc.
-- **Sources de données** — comparaison API vs scraping (volume, qualité)
+- **Localisations des offres** — répartition géographique (Paris, remote…)
+- **Niveaux de postes** — junior / mid / senior détectés depuis les titres
+- **Compétences recherchées** — Python, SQL, AWS, AI
+- **Sources de données** — comparaison Adzuna vs Remotive (volume, couverture)
+- **Complexité des titres** — distribution de la longueur des intitulés de poste
 
 ---
 
@@ -280,10 +282,10 @@ Les analyses sont documentées dans `notebooks/analysis.ipynb` :
 **Lyna Lasla**
 Mastère Data & Intelligence Artificielle
 École Multimédia — Paris
+
 ---
 
 <div align="center">
 
 *Projet réalisé dans le cadre du Mastère Directeur de Projet en Intelligence Artificielle — École Multimédia, Paris*
-
 </div>
