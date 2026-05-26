@@ -38,39 +38,43 @@ Ce projet conçoit une **infrastructure Data Cloud complète** autour du marché
 
 > 🎯 **Objectif** : reproduire un pipeline ETL moderne conforme aux standards du Data Engineering et du Cloud Computing.
 
----
+## 🏗️ Architecture globale du projet
 
-## 🏗️ Architecture
-┌─────────────────────────────────────────────────────────────┐
-│                     SOURCES DE DONNÉES                       │
-│           API Adzuna  +  API Remotive (remote jobs)          │
-└─────────────────────┬───────────────────────────────────────┘
-│
-▼
-┌─────────────────────────────────────────────────────────────┐
-│                  PIPELINE ETL (Python)                        │
-│   Collecte (api.py / scrape.py) → Transform → Load           │
-└─────────────────────┬───────────────────────────────────────┘
-│
-▼
-┌─────────────────────────────────────────────────────────────┐
-│               CONTENEURISATION (Docker)                       │
-│         Dockerfile + docker-compose.yml                      │
-│    Lance automatiquement : transform.py → to_s3.py           │
-└──────────┬──────────────────────────┬───────────────────────┘
-│                          │
-▼                          ▼
-┌──────────────────┐      ┌──────────────────────────┐
-│   AWS S3         │      │   AWS RDS PostgreSQL      │
-│   (Data Lake)    │      │   (Data Warehouse)        │
-│  Données brutes  │      │  Données structurées      │
-└──────────────────┘      └────────────┬─────────────┘
-│
-▼
-┌────────────────────────┐
-│  Dashboard Plotly/HTML  │
-│  KPIs · Filtres · Graphs│
-└────────────────────────┘
+```
+┌──────────────────────────────────────────────────────────────┐
+│                    SOURCES DE DONNÉES                        │
+│         API Adzuna  +  API Remotive (remote jobs)           │
+└──────────────────────────────┬───────────────────────────────┘
+                               │
+                               ▼
+┌──────────────────────────────────────────────────────────────┐
+│                     PIPELINE ETL (Python)                    │
+│   api.py / scrape.py → Extraction                            │
+│   transform.py        → Transformation                       │
+│   load.py             → Chargement                           │
+└──────────────────────────────┬───────────────────────────────┘
+                               │
+                               ▼
+┌──────────────────────────────────────────────────────────────┐
+│                 CONTENEURISATION (Docker)                    │
+│        Dockerfile + docker-compose.yml                       │
+│   Orchestration automatique du pipeline ETL                  │
+│   (transform.py → to_s3.py → load DB)                       │
+└──────────────────────────────┬───────────────┬───────────────┘
+                               │               │
+                               ▼               ▼
+┌──────────────────────────────┐   ┌───────────────────────────┐
+│          AWS S3              │   │     AWS RDS PostgreSQL     │
+│        (Data Lake)           │   │     (Data Warehouse)       │
+│      Données brutes          │   │   Données structurées      │
+└──────────────────────────────┘   └────────────┬──────────────┘
+                                               │
+                                               ▼
+┌──────────────────────────────────────────────────────────────┐
+│                 DASHBOARD (Plotly / HTML)                    │
+│        KPIs • filtres • visualisations interactives          │
+└──────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -91,6 +95,7 @@ Ce projet conçoit une **infrastructure Data Cloud complète** autour du marché
 ---
 
 ## 📁 Structure du projet
+```
 projet-data/
 │
 ├── 📂 aws/                         # Configuration infrastructure AWS
@@ -132,7 +137,7 @@ projet-data/
 ├── requirements.txt                # Dépendances Python
 ├── .env                            # Variables d'environnement (non versionné)
 └── README.md                       # Documentation du projet
-
+```
 ---
 
 ## ⚙️ Installation
