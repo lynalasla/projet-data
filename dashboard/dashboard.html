@@ -6,14 +6,12 @@
 
 <style>
 
-/* ================= THEME ================= */
-
 :root {
     --bg:#0B0F1A;
     --card:#111827;
     --text:#ffffff;
-    --accent:#FF4FA3;
     --muted:#94A3B8;
+    --accent:#FF4FA3;
 }
 
 body.light {
@@ -42,7 +40,6 @@ body {
 
 .header img {
     height:45px;
-    object-fit:contain;
 }
 
 /* KPI */
@@ -58,7 +55,6 @@ body {
     padding:12px;
     border-radius:12px;
     text-align:center;
-    font-size:14px;
 }
 
 /* FILTERS */
@@ -80,7 +76,7 @@ select {
 /* GRID */
 .grid {
     display:grid;
-    grid-template-columns:repeat(3, 1fr);
+    grid-template-columns:repeat(2, 1fr);
     gap:14px;
     padding:14px;
 }
@@ -88,9 +84,8 @@ select {
 .card {
     background:var(--card);
     border-radius:14px;
-    padding:18px;
-    height:380px;
-    overflow:hidden;
+    padding:14px;
+    min-height:420px;
 }
 
 .title {
@@ -98,15 +93,25 @@ select {
     font-weight:bold;
 }
 
-.subtitle {
+.desc {
     font-size:12px;
     color:var(--muted);
-    margin-bottom:6px;
+    margin-bottom:10px;
 }
 
 .chart {
     width:100%;
-    height:300px;
+    height:340px;
+}
+
+.insights {
+    background:var(--card);
+    margin:14px;
+    padding:14px;
+    border-radius:12px;
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.5;
 }
 
 button {
@@ -114,7 +119,6 @@ button {
     background:none;
     border:none;
     font-size:22px;
-    color:var(--text);
 }
 
 </style>
@@ -127,7 +131,6 @@ button {
     <button onclick="toggleTheme()" id="toggle">🌙</button>
 </div>
 
-<!-- KPI -->
 <div class="kpi">
     <div class="kpi-box">Jobs<br>38</div>
     <div class="kpi-box">Companies<br>32</div>
@@ -135,7 +138,6 @@ button {
     <div class="kpi-box">Sources<br>2</div>
 </div>
 
-<!-- FILTERS -->
 <div class="filters">
     <select id="city" onchange="filterData()">
         <option value="all">All cities</option>
@@ -148,40 +150,84 @@ button {
     </select>
 </div>
 
-<!-- GRID -->
 <div class="grid">
 
-<div class="card"><div class="title">Top Companies</div><div id="c1" class="chart"></div></div>
-<div class="card"><div class="title">Top Locations</div><div id="c2" class="chart"></div></div>
-<div class="card"><div class="title">Sources</div><div id="c3" class="chart"></div></div>
-<div class="card"><div class="title">Job Levels</div><div id="c4" class="chart"></div></div>
-<div class="card"><div class="title">Skills</div><div id="c5" class="chart"></div></div>
-<div class="card"><div class="title">Title Complexity</div><div id="c6" class="chart"></div></div>
-<div class="card"><div class="title">Company Share</div><div id="c7" class="chart"></div></div>
-<div class="card"><div class="title">Location Share</div><div id="c8" class="chart"></div></div>
+<div class="card">
+<div class="title">Top Companies</div>
+<div class="desc">Distribution des offres par entreprise</div>
+<div id="c1" class="chart"></div>
+</div>
 
+<div class="card">
+<div class="title">Top Locations</div>
+<div class="desc">Répartition géographique des offres</div>
+<div id="c2" class="chart"></div>
+</div>
+
+<div class="card">
+<div class="title">Sources</div>
+<div class="desc">Origine des données (Adzuna, Remotive...)</div>
+<div id="c3" class="chart"></div>
+</div>
+
+<div class="card">
+<div class="title">Job Levels</div>
+<div class="desc">Répartition junior / mid / senior</div>
+<div id="c4" class="chart"></div>
+</div>
+
+<div class="card">
+<div class="title">Skills signals</div>
+<div class="desc">Présence des compétences dans les titres</div>
+<div id="c5" class="chart"></div>
+</div>
+
+<div class="card">
+<div class="title">Title complexity</div>
+<div class="desc">Longueur des intitulés de poste</div>
+<div id="c6" class="chart"></div>
+</div>
+
+<div class="card">
+<div class="title">Company share</div>
+<div class="desc">Top 5 entreprises dominantes</div>
+<div id="c7" class="chart"></div>
+</div>
+
+<div class="card">
+<div class="title">Location share</div>
+<div class="desc">Top 5 zones géographiques</div>
+<div id="c8" class="chart"></div>
+</div>
+
+</div>
+
+<div class="insights">
+<b>Analyse & insights métiers :</b><br><br>
+
+• Le marché est fortement concentré autour de quelques grandes entreprises (Capgemini, Mirakl, etc.).<br>
+• Paris domine largement les opportunités, confirmant une centralisation du marché data.<br>
+• Les niveaux mid et senior sont majoritaires → marché orienté expérience.<br>
+• Les mentions AI/ML sont récurrentes → forte demande en IA générative et data science.<br>
+• Peu de mentions explicites de skills techniques dans les titres → importance des compétences implicites.<br><br>
+
+Objectif métier : identifier les zones de recrutement, les compétences recherchées et la structure du marché data.
 </div>
 
 <script>
 
 let dark = true;
-const data = [{"title":"Data Scientist","company":"Bizzdesign","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist","sector":"Data Science","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"mid","title_length_score":14},{"title":"DATA SCIENTIST 4\/11","company":"Minist\u00e8re des Arm\u00e9es","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist 4\/11","sector":"Data Science","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"mid","title_length_score":19},{"title":"Data Scientist Senior Consultant","company":"JAKALA","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist senior consultant","sector":"Data Science","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"senior","title_length_score":32},{"title":"Data Scientist Confirm\u00e9 (H\/F)","company":"Equancy | Groupe EDG","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist confirm\u00e9 (h\/f)","sector":"Data Science","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"mid","title_length_score":29},{"title":"Data Scientist Senior H\/F","company":"OVENTI Consulting","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist senior h\/f","sector":"Data Science","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"senior","title_length_score":25},{"title":"Data Scientist \/ AI Engineer (Agentique)","company":"MP DATA","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist \/ ai engineer (agentique)","sector":"Data Science","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":true,"level":"mid","title_length_score":40},{"title":"STAGE - Data Scientist (H\/F)","company":"Isea","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"stage - data scientist (h\/f)","sector":"Data Science","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"mid","title_length_score":28},{"title":"Data Scientist - AI Marketplace Platform","company":"Mirakl","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist - ai marketplace platform","sector":"Data Science","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":true,"level":"mid","title_length_score":40},{"title":"Data Scientist","company":"Capgemini","location":"1er Arrondissement, Paris","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist","sector":"Data Science","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"mid","title_length_score":14},{"title":"Data scientist","company":"Spirica","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist","sector":"Data Science","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"mid","title_length_score":14},{"title":"Data Scientist","company":"Mistral Ai","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist","sector":"Data Science","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"mid","title_length_score":14},{"title":"Data scientist","company":"Caisse des d\u00e9p\u00f4ts groupe","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist","sector":"Data Science","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"mid","title_length_score":14},{"title":"Data Scientist","company":"Mistral AI","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist","sector":"Data Science","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"mid","title_length_score":14},{"title":"Data Scientist","company":"Veepee","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist","sector":"Data Science","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"mid","title_length_score":14},{"title":"Data Scientist","company":"Sonio","location":"Paris, Ile-de-France","salary_min":45000.0,"salary_max":55000.0,"source":"adzuna","title_lower":"data scientist","sector":"Data Science","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"mid","title_length_score":14},{"title":"Data Scientist \/ GenAI | CDI | H\/F","company":"Eulidia","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist \/ genai | cdi | h\/f","sector":"Data Science","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":true,"level":"mid","title_length_score":34},{"title":"Data Scientist - Solutions Front (H\/F)","company":"CHOLET DUPONT OUDART","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist - solutions front (h\/f)","sector":"Data Science","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"mid","title_length_score":38},{"title":"Data Scientist IA \u2013 Freelance (H\/F)","company":"SCC France","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist ia \u2013 freelance (h\/f)","sector":"Data Science","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"mid","title_length_score":35},{"title":"Data Scientist Senior | Paris | Flexible Remote","company":"Talent-R","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist senior | paris | flexible remote","sector":"Data Science","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"senior","title_length_score":47},{"title":"Senior Data Scientist NLP\/GenAI - Catalog","company":"Mirakl","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"senior data scientist nlp\/genai - catalog","sector":"Data Science","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":true,"level":"senior","title_length_score":41},{"title":"Senior Independent Software Developer","company":"A.Team","location":"Americas, Europe, Israel","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"senior independent software developer","sector":"Other","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"senior","title_length_score":37},{"title":"Senior Independent AI Engineer \/ Architect","company":"A.Team","location":"Americas, Europe, Israel","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"senior independent ai engineer \/ architect","sector":"Data Engineering","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":true,"level":"senior","title_length_score":42},{"title":"Senior Full-stack React Developer","company":"Lemon.io","location":"Americas, Europe, Asia, Oceania","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"senior full-stack react developer","sector":"Other","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"senior","title_length_score":33},{"title":"Marketing Manager, Content & AI Enablement","company":"Expion Health","location":"USA","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"marketing manager, content & ai enablement","sector":"Other","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":true,"level":"mid","title_length_score":42},{"title":"Tech Lead Full-Stack Rails Engineer","company":"Mitre Media","location":"USA, Canada, USA timezones","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"tech lead full-stack rails engineer","sector":"Data Engineering","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":true,"level":"mid","title_length_score":35},{"title":"Business Transformation Lead","company":"Expion Health","location":"USA","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"business transformation lead","sector":"Other","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"mid","title_length_score":28},{"title":"Office Assistant","company":"Coalition Technologies ","location":"Worldwide","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"office assistant","sector":"Other","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"mid","title_length_score":16},{"title":"Director of Revenue Systems and AI Automation (Offshore) ","company":"Caul Group","location":"LATAM","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"director of revenue systems and ai automation (offshore) ","sector":"Other","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":true,"level":"mid","title_length_score":57},{"title":"iOS Developer","company":"nooro","location":"USA","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"ios developer","sector":"Other","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"mid","title_length_score":13},{"title":"Inside Sales Contractor","company":"Credit Wellness, LLC","location":"Worldwide","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"inside sales contractor","sector":"Other","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"mid","title_length_score":23},{"title":"Freelance Writer","company":"IAPWE","location":"Worldwide","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"freelance writer","sector":"Other","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"mid","title_length_score":16},{"title":"\ud83c\udde9\ud83c\uddeaCustomer Support Manager","company":"Parkosecure GmbH","location":"Switzerland","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"\ud83c\udde9\ud83c\uddeacustomer support manager","sector":"Other","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"mid","title_length_score":26},{"title":"Copywriter","company":"Coalition Technologies ","location":"Worldwide","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"copywriter","sector":"Other","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"mid","title_length_score":10},{"title":"Senior DevOps Engineer","company":"Lemon.io","location":"Americas, Europe, Asia, Oceania","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"senior devops engineer","sector":"Data Engineering","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"senior","title_length_score":22},{"title":"Head of Engineering","company":"Lemon.io","location":"USA timezones, European timezones","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"head of engineering","sector":"Data Engineering","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"mid","title_length_score":19},{"title":"Mid\/Senior AI Video Artist","company":"EverAI","location":"Worldwide","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"mid\/senior ai video artist","sector":"Other","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":true,"level":"senior","title_length_score":26},{"title":"Content Reviewer - US","company":"TELUS Digital","location":"USA","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"content reviewer - us","sector":"Other","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":false,"level":"mid","title_length_score":21},{"title":"AI Engineer","company":"Dry Ground AI","location":"Brazil, Colombia, Philippines","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"ai engineer","sector":"Data Engineering","skill_python":false,"skill_sql":false,"skill_aws":false,"skill_spark":false,"skill_machine_learning":false,"skill_ai":true,"level":"mid","title_length_score":11}];
+const data = [{"title":"Data Scientist","company":"Bizzdesign","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist","title_length":14,"level":"mid"},{"title":"DATA SCIENTIST 4\/11","company":"Minist\u00e8re des Arm\u00e9es","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist 4\/11","title_length":19,"level":"mid"},{"title":"Data Scientist Senior Consultant","company":"JAKALA","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist senior consultant","title_length":32,"level":"senior"},{"title":"Data Scientist Confirm\u00e9 (H\/F)","company":"Equancy | Groupe EDG","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist confirm\u00e9 (h\/f)","title_length":29,"level":"mid"},{"title":"Data Scientist Senior H\/F","company":"OVENTI Consulting","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist senior h\/f","title_length":25,"level":"senior"},{"title":"Data Scientist \/ AI Engineer (Agentique)","company":"MP DATA","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist \/ ai engineer (agentique)","title_length":40,"level":"mid"},{"title":"STAGE - Data Scientist (H\/F)","company":"Isea","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"stage - data scientist (h\/f)","title_length":28,"level":"mid"},{"title":"Data Scientist - AI Marketplace Platform","company":"Mirakl","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist - ai marketplace platform","title_length":40,"level":"mid"},{"title":"Data Scientist","company":"Capgemini","location":"1er Arrondissement, Paris","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist","title_length":14,"level":"mid"},{"title":"Data scientist","company":"Spirica","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist","title_length":14,"level":"mid"},{"title":"Data Scientist","company":"Mistral Ai","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist","title_length":14,"level":"mid"},{"title":"Data scientist","company":"Caisse des d\u00e9p\u00f4ts groupe","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist","title_length":14,"level":"mid"},{"title":"Data Scientist","company":"Mistral AI","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist","title_length":14,"level":"mid"},{"title":"Data Scientist","company":"Veepee","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist","title_length":14,"level":"mid"},{"title":"Data Scientist","company":"Sonio","location":"Paris, Ile-de-France","salary_min":45000.0,"salary_max":55000.0,"source":"adzuna","title_lower":"data scientist","title_length":14,"level":"mid"},{"title":"Data Scientist \/ GenAI | CDI | H\/F","company":"Eulidia","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist \/ genai | cdi | h\/f","title_length":34,"level":"mid"},{"title":"Data Scientist - Solutions Front (H\/F)","company":"CHOLET DUPONT OUDART","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist - solutions front (h\/f)","title_length":38,"level":"mid"},{"title":"Data Scientist IA \u2013 Freelance (H\/F)","company":"SCC France","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist ia \u2013 freelance (h\/f)","title_length":35,"level":"mid"},{"title":"Data Scientist Senior | Paris | Flexible Remote","company":"Talent-R","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"data scientist senior | paris | flexible remote","title_length":47,"level":"senior"},{"title":"Senior Data Scientist NLP\/GenAI - Catalog","company":"Mirakl","location":"Paris, Ile-de-France","salary_min":null,"salary_max":null,"source":"adzuna","title_lower":"senior data scientist nlp\/genai - catalog","title_length":41,"level":"senior"},{"title":"Senior Independent Software Developer","company":"A.Team","location":"Americas, Europe, Israel","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"senior independent software developer","title_length":37,"level":"senior"},{"title":"Senior Independent AI Engineer \/ Architect","company":"A.Team","location":"Americas, Europe, Israel","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"senior independent ai engineer \/ architect","title_length":42,"level":"senior"},{"title":"Senior Full-stack React Developer","company":"Lemon.io","location":"Americas, Europe, Asia, Oceania","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"senior full-stack react developer","title_length":33,"level":"senior"},{"title":"Marketing Manager, Content & AI Enablement","company":"Expion Health","location":"USA","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"marketing manager, content & ai enablement","title_length":42,"level":"mid"},{"title":"Tech Lead Full-Stack Rails Engineer","company":"Mitre Media","location":"USA, Canada, USA timezones","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"tech lead full-stack rails engineer","title_length":35,"level":"mid"},{"title":"Business Transformation Lead","company":"Expion Health","location":"USA","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"business transformation lead","title_length":28,"level":"mid"},{"title":"Office Assistant","company":"Coalition Technologies ","location":"Worldwide","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"office assistant","title_length":16,"level":"mid"},{"title":"Director of Revenue Systems and AI Automation (Offshore) ","company":"Caul Group","location":"LATAM","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"director of revenue systems and ai automation (offshore) ","title_length":57,"level":"mid"},{"title":"iOS Developer","company":"nooro","location":"USA","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"ios developer","title_length":13,"level":"mid"},{"title":"Inside Sales Contractor","company":"Credit Wellness, LLC","location":"Worldwide","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"inside sales contractor","title_length":23,"level":"mid"},{"title":"Freelance Writer","company":"IAPWE","location":"Worldwide","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"freelance writer","title_length":16,"level":"mid"},{"title":"\ud83c\udde9\ud83c\uddeaCustomer Support Manager","company":"Parkosecure GmbH","location":"Switzerland","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"\ud83c\udde9\ud83c\uddeacustomer support manager","title_length":26,"level":"mid"},{"title":"Copywriter","company":"Coalition Technologies ","location":"Worldwide","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"copywriter","title_length":10,"level":"mid"},{"title":"Senior DevOps Engineer","company":"Lemon.io","location":"Americas, Europe, Asia, Oceania","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"senior devops engineer","title_length":22,"level":"senior"},{"title":"Head of Engineering","company":"Lemon.io","location":"USA timezones, European timezones","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"head of engineering","title_length":19,"level":"mid"},{"title":"Mid\/Senior AI Video Artist","company":"EverAI","location":"Worldwide","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"mid\/senior ai video artist","title_length":26,"level":"senior"},{"title":"Content Reviewer - US","company":"TELUS Digital","location":"USA","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"content reviewer - us","title_length":21,"level":"mid"},{"title":"AI Engineer","company":"Dry Ground AI","location":"Brazil, Colombia, Philippines","salary_min":null,"salary_max":null,"source":"remotive","title_lower":"ai engineer","title_length":11,"level":"mid"}];
 
 function toggleTheme() {
     dark = !dark;
-
     document.body.classList.toggle("light");
 
-    const logo = document.getElementById("logo");
-    const toggle = document.getElementById("toggle");
+    document.getElementById("logo").src =
+        dark ? "logo-dark.svg" : "logo-light.svg";
 
-    if(dark) {
-        logo.src = "logo-dark.svg";
-        toggle.innerHTML = "🌙";
-    } else {
-        logo.src = "logo-light.svg";
-        toggle.innerHTML = "☀️";
-    }
+    document.getElementById("toggle").innerHTML =
+        dark ? "🌙" : "☀️";
 
     render(data);
 }
@@ -191,8 +237,12 @@ function layout() {
         paper_bgcolor:"rgba(0,0,0,0)",
         plot_bgcolor:"rgba(0,0,0,0)",
         font:{color: dark ? "#fff" : "#111"},
-        margin:{t:10,l:10,r:10,b:10}
+        margin:{t:20,l:40,r:20,b:80}
     }
+}
+
+function fixLabels(arr) {
+    return arr.map(x => x.length > 18 ? x.slice(0,18) + "..." : x);
 }
 
 function render(filtered) {
@@ -212,19 +262,43 @@ function render(filtered) {
         if(t.includes("sql")) skills.sql++;
         if(t.includes("aws")) skills.aws++;
         if(t.includes("ai")) skills.ai++;
-
     });
 
     const cfg={responsive:true, displayModeBar:false};
 
-    Plotly.newPlot("c1",[{x:Object.keys(comp),y:Object.values(comp),type:"bar"}],layout(),cfg);
-    Plotly.newPlot("c2",[{x:Object.keys(loc),y:Object.values(loc),type:"bar"}],layout(),cfg);
-    Plotly.newPlot("c3",[{labels:Object.keys(src),values:Object.values(src),type:"pie"}],layout(),cfg);
-    Plotly.newPlot("c4",[{x:Object.keys(lvl),y:Object.values(lvl),type:"bar"}],layout(),cfg);
-    Plotly.newPlot("c5",[{x:Object.keys(skills),y:Object.values(skills),type:"bar"}],layout(),cfg);
-    Plotly.newPlot("c6",[{x:filtered.map(d=>d.title.length),type:"histogram"}],layout(),cfg);
-    Plotly.newPlot("c7",[{labels:Object.keys(comp).slice(0,5),values:Object.values(comp).slice(0,5),type:"pie"}],layout(),cfg);
-    Plotly.newPlot("c8",[{labels:Object.keys(loc).slice(0,5),values:Object.values(loc).slice(0,5),type:"pie"}],layout(),cfg);
+    Plotly.newPlot("c1",[
+        {x:fixLabels(Object.keys(comp)), y:Object.values(comp), type:"bar"}
+    ],layout(),cfg);
+
+    Plotly.newPlot("c2",[
+        {x:fixLabels(Object.keys(loc)), y:Object.values(loc), type:"bar"}
+    ],layout(),cfg);
+
+    Plotly.newPlot("c3",[
+        {labels:Object.keys(src), values:Object.values(src), type:"pie"}
+    ],layout(),cfg);
+
+    Plotly.newPlot("c4",[
+        {x:Object.keys(lvl), y:Object.values(lvl), type:"bar"}
+    ],layout(),cfg);
+
+    Plotly.newPlot("c5",[
+        {x:Object.keys(skills), y:Object.values(skills), type:"bar"}
+    ],layout(),cfg);
+
+    Plotly.newPlot("c6",[
+        {x:filtered.map(d=>d.title.length), type:"histogram"}
+    ],layout(),cfg);
+
+    Plotly.newPlot("c7",[
+        {labels:fixLabels(Object.keys(comp).slice(0,5)),
+          values:Object.values(comp).slice(0,5), type:"pie"}
+    ],layout(),cfg);
+
+    Plotly.newPlot("c8",[
+        {labels:fixLabels(Object.keys(loc).slice(0,5)),
+          values:Object.values(loc).slice(0,5), type:"pie"}
+    ],layout(),cfg);
 
 }
 

@@ -17,14 +17,12 @@ html = f"""
 
 <style>
 
-/* ================= THEME ================= */
-
 :root {{
     --bg:#0B0F1A;
     --card:#111827;
     --text:#ffffff;
-    --accent:#FF4FA3;
     --muted:#94A3B8;
+    --accent:#FF4FA3;
 }}
 
 body.light {{
@@ -53,7 +51,6 @@ body {{
 
 .header img {{
     height:45px;
-    object-fit:contain;
 }}
 
 /* KPI */
@@ -69,7 +66,6 @@ body {{
     padding:12px;
     border-radius:12px;
     text-align:center;
-    font-size:14px;
 }}
 
 /* FILTERS */
@@ -91,7 +87,7 @@ select {{
 /* GRID */
 .grid {{
     display:grid;
-    grid-template-columns:repeat(3, 1fr);
+    grid-template-columns:repeat(2, 1fr);
     gap:14px;
     padding:14px;
 }}
@@ -99,9 +95,8 @@ select {{
 .card {{
     background:var(--card);
     border-radius:14px;
-    padding:18px;
-    height:380px;
-    overflow:hidden;
+    padding:14px;
+    min-height:420px;
 }}
 
 .title {{
@@ -109,15 +104,25 @@ select {{
     font-weight:bold;
 }}
 
-.subtitle {{
+.desc {{
     font-size:12px;
     color:var(--muted);
-    margin-bottom:6px;
+    margin-bottom:10px;
 }}
 
 .chart {{
     width:100%;
-    height:300px;
+    height:340px;
+}}
+
+.insights {{
+    background:var(--card);
+    margin:14px;
+    padding:14px;
+    border-radius:12px;
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.5;
 }}
 
 button {{
@@ -125,7 +130,6 @@ button {{
     background:none;
     border:none;
     font-size:22px;
-    color:var(--text);
 }}
 
 </style>
@@ -138,7 +142,6 @@ button {{
     <button onclick="toggleTheme()" id="toggle">🌙</button>
 </div>
 
-<!-- KPI -->
 <div class="kpi">
     <div class="kpi-box">Jobs<br>{len(df)}</div>
     <div class="kpi-box">Companies<br>{df['company'].nunique()}</div>
@@ -146,7 +149,6 @@ button {{
     <div class="kpi-box">Sources<br>{df['source'].nunique()}</div>
 </div>
 
-<!-- FILTERS -->
 <div class="filters">
     <select id="city" onchange="filterData()">
         <option value="all">All cities</option>
@@ -159,18 +161,68 @@ button {{
     </select>
 </div>
 
-<!-- GRID -->
 <div class="grid">
 
-<div class="card"><div class="title">Top Companies</div><div id="c1" class="chart"></div></div>
-<div class="card"><div class="title">Top Locations</div><div id="c2" class="chart"></div></div>
-<div class="card"><div class="title">Sources</div><div id="c3" class="chart"></div></div>
-<div class="card"><div class="title">Job Levels</div><div id="c4" class="chart"></div></div>
-<div class="card"><div class="title">Skills</div><div id="c5" class="chart"></div></div>
-<div class="card"><div class="title">Title Complexity</div><div id="c6" class="chart"></div></div>
-<div class="card"><div class="title">Company Share</div><div id="c7" class="chart"></div></div>
-<div class="card"><div class="title">Location Share</div><div id="c8" class="chart"></div></div>
+<div class="card">
+<div class="title">Top Companies</div>
+<div class="desc">Distribution des offres par entreprise</div>
+<div id="c1" class="chart"></div>
+</div>
 
+<div class="card">
+<div class="title">Top Locations</div>
+<div class="desc">Répartition géographique des offres</div>
+<div id="c2" class="chart"></div>
+</div>
+
+<div class="card">
+<div class="title">Sources</div>
+<div class="desc">Origine des données (Adzuna, Remotive...)</div>
+<div id="c3" class="chart"></div>
+</div>
+
+<div class="card">
+<div class="title">Job Levels</div>
+<div class="desc">Répartition junior / mid / senior</div>
+<div id="c4" class="chart"></div>
+</div>
+
+<div class="card">
+<div class="title">Skills signals</div>
+<div class="desc">Présence des compétences dans les titres</div>
+<div id="c5" class="chart"></div>
+</div>
+
+<div class="card">
+<div class="title">Title complexity</div>
+<div class="desc">Longueur des intitulés de poste</div>
+<div id="c6" class="chart"></div>
+</div>
+
+<div class="card">
+<div class="title">Company share</div>
+<div class="desc">Top 5 entreprises dominantes</div>
+<div id="c7" class="chart"></div>
+</div>
+
+<div class="card">
+<div class="title">Location share</div>
+<div class="desc">Top 5 zones géographiques</div>
+<div id="c8" class="chart"></div>
+</div>
+
+</div>
+
+<div class="insights">
+<b>Analyse & insights métiers :</b><br><br>
+
+• Le marché est fortement concentré autour de quelques grandes entreprises (Capgemini, Mirakl, etc.).<br>
+• Paris domine largement les opportunités, confirmant une centralisation du marché data.<br>
+• Les niveaux mid et senior sont majoritaires → marché orienté expérience.<br>
+• Les mentions AI/ML sont récurrentes → forte demande en IA générative et data science.<br>
+• Peu de mentions explicites de skills techniques dans les titres → importance des compétences implicites.<br><br>
+
+Objectif métier : identifier les zones de recrutement, les compétences recherchées et la structure du marché data.
 </div>
 
 <script>
@@ -180,19 +232,13 @@ const data = {df.to_json(orient="records")};
 
 function toggleTheme() {{
     dark = !dark;
-
     document.body.classList.toggle("light");
 
-    const logo = document.getElementById("logo");
-    const toggle = document.getElementById("toggle");
+    document.getElementById("logo").src =
+        dark ? "logo-dark.svg" : "logo-light.svg";
 
-    if(dark) {{
-        logo.src = "logo-dark.svg";
-        toggle.innerHTML = "🌙";
-    }} else {{
-        logo.src = "logo-light.svg";
-        toggle.innerHTML = "☀️";
-    }}
+    document.getElementById("toggle").innerHTML =
+        dark ? "🌙" : "☀️";
 
     render(data);
 }}
@@ -202,8 +248,12 @@ function layout() {{
         paper_bgcolor:"rgba(0,0,0,0)",
         plot_bgcolor:"rgba(0,0,0,0)",
         font:{{color: dark ? "#fff" : "#111"}},
-        margin:{{t:10,l:10,r:10,b:10}}
+        margin:{{t:20,l:40,r:20,b:80}}
     }}
+}}
+
+function fixLabels(arr) {{
+    return arr.map(x => x.length > 18 ? x.slice(0,18) + "..." : x);
 }}
 
 function render(filtered) {{
@@ -223,19 +273,43 @@ function render(filtered) {{
         if(t.includes("sql")) skills.sql++;
         if(t.includes("aws")) skills.aws++;
         if(t.includes("ai")) skills.ai++;
-
     }});
 
     const cfg={{responsive:true, displayModeBar:false}};
 
-    Plotly.newPlot("c1",[{{x:Object.keys(comp),y:Object.values(comp),type:"bar"}}],layout(),cfg);
-    Plotly.newPlot("c2",[{{x:Object.keys(loc),y:Object.values(loc),type:"bar"}}],layout(),cfg);
-    Plotly.newPlot("c3",[{{labels:Object.keys(src),values:Object.values(src),type:"pie"}}],layout(),cfg);
-    Plotly.newPlot("c4",[{{x:Object.keys(lvl),y:Object.values(lvl),type:"bar"}}],layout(),cfg);
-    Plotly.newPlot("c5",[{{x:Object.keys(skills),y:Object.values(skills),type:"bar"}}],layout(),cfg);
-    Plotly.newPlot("c6",[{{x:filtered.map(d=>d.title.length),type:"histogram"}}],layout(),cfg);
-    Plotly.newPlot("c7",[{{labels:Object.keys(comp).slice(0,5),values:Object.values(comp).slice(0,5),type:"pie"}}],layout(),cfg);
-    Plotly.newPlot("c8",[{{labels:Object.keys(loc).slice(0,5),values:Object.values(loc).slice(0,5),type:"pie"}}],layout(),cfg);
+    Plotly.newPlot("c1",[
+        {{x:fixLabels(Object.keys(comp)), y:Object.values(comp), type:"bar"}}
+    ],layout(),cfg);
+
+    Plotly.newPlot("c2",[
+        {{x:fixLabels(Object.keys(loc)), y:Object.values(loc), type:"bar"}}
+    ],layout(),cfg);
+
+    Plotly.newPlot("c3",[
+        {{labels:Object.keys(src), values:Object.values(src), type:"pie"}}
+    ],layout(),cfg);
+
+    Plotly.newPlot("c4",[
+        {{x:Object.keys(lvl), y:Object.values(lvl), type:"bar"}}
+    ],layout(),cfg);
+
+    Plotly.newPlot("c5",[
+        {{x:Object.keys(skills), y:Object.values(skills), type:"bar"}}
+    ],layout(),cfg);
+
+    Plotly.newPlot("c6",[
+        {{x:filtered.map(d=>d.title.length), type:"histogram"}}
+    ],layout(),cfg);
+
+    Plotly.newPlot("c7",[
+        {{labels:fixLabels(Object.keys(comp).slice(0,5)),
+          values:Object.values(comp).slice(0,5), type:"pie"}}
+    ],layout(),cfg);
+
+    Plotly.newPlot("c8",[
+        {{labels:fixLabels(Object.keys(loc).slice(0,5)),
+          values:Object.values(loc).slice(0,5), type:"pie"}}
+    ],layout(),cfg);
 
 }}
 
