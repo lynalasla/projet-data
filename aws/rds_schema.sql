@@ -1,0 +1,2 @@
+-- Schéma PostgreSQL prévu pour les prochaines améliorations du projet
+-- (non implémenté dans la version actuelle)
