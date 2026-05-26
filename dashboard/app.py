@@ -1,11 +1,13 @@
 import os
 import pandas as pd
 
+# Je récupère le chemin du fichier depuis n'importe où sur la machine
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_PATH = os.path.join(BASE_DIR, "..", "data", "processed", "jobs_clean.csv")
 
 df = pd.read_csv(DATA_PATH)
 
+# Je m'assure que les titres sont bien en string avant de les manipuler
 df["title"] = df["title"].astype(str)
 df["title_lower"] = df["title"].str.lower()
 
@@ -19,6 +21,7 @@ html = f"""
 
 <style>
 
+/* Mes variables CSS pour gérer le thème dark/light facilement */
 :root {{
     --bg:#0B0F1A;
     --card:#111827;
@@ -28,6 +31,7 @@ html = f"""
     --border:#1F2937;
 }}
 
+/* Je surcharge les variables quand l'utilisateur passe en mode clair */
 body.light {{
     --bg:#F5F7FB;
     --card:#ffffff;
@@ -53,6 +57,7 @@ body {{
     padding:18px 24px;
     background:var(--card);
     border-bottom:1px solid var(--border);
+    /* Je le mets en sticky pour qu'il reste visible en scrollant */
     position:sticky;
     top:0;
     z-index:100;
@@ -89,6 +94,7 @@ button {{
 
 /* KPI */
 
+/* 4 colonnes égales pour les cartes KPI */
 .kpi {{
     display:grid;
     grid-template-columns:repeat(4,1fr);
@@ -134,6 +140,7 @@ select {{
 
 /* GRID */
 
+/* 2 graphiques côte à côte */
 .grid {{
     display:grid;
     grid-template-columns:repeat(2, 1fr);
@@ -193,6 +200,7 @@ select {{
     line-height:1.7;
 }}
 
+/* Responsive : je passe en 1 colonne sous 1100px */
 @media(max-width:1100px) {{
 
     .grid {{
@@ -204,6 +212,7 @@ select {{
     }}
 }}
 
+/* Sur mobile je simplifie encore plus */
 @media(max-width:700px) {{
 
     .kpi {{
@@ -239,6 +248,7 @@ select {{
 
 <div class="kpi">
 
+    <!-- Statistiques globales calculées directement depuis le DataFrame -->
     <div class="kpi-box">
         <div class="kpi-title">Total Jobs</div>
         <div class="kpi-value">{len(df)}</div>
@@ -263,6 +273,7 @@ select {{
 
 <div class="filters">
 
+    <!-- Je limite à 20 options pour ne pas surcharger les dropdowns -->
     <select id="city" onchange="filterData()">
         <option value="all">All locations</option>
         {''.join([f'<option>{c}</option>' for c in df["location"].dropna().unique()[:20]])}
@@ -434,6 +445,7 @@ besoins autour de l'IA et de la Data Science.
 
 let dark = true;
 
+// Je charge toutes les données une seule fois au démarrage
 const data = {df.to_json(orient="records")};
 
 function toggleTheme() {{
@@ -442,15 +454,18 @@ function toggleTheme() {{
 
     document.body.classList.toggle("light");
 
+    // Je change le logo selon le thème
     document.getElementById("logo").src =
         dark ? "logo-dark.svg" : "logo-light.svg";
 
     document.getElementById("toggle").innerHTML =
         dark ? "🌙" : "☀️";
 
+    // Je re-render les graphiques pour mettre à jour les couleurs
     render(data);
 }}
 
+// Je centralise les options Plotly pour garder un style cohérent
 function layout() {{
 
     return {{
@@ -481,6 +496,7 @@ function layout() {{
     }}
 }}
 
+// Je tronque les labels trop longs pour éviter que ça déborde
 function shorten(arr) {{
 
     return arr.map(x =>
@@ -488,6 +504,7 @@ function shorten(arr) {{
     );
 }}
 
+// Je trie par valeur décroissante et je prends les N premiers
 function topEntries(obj, limit=8) {{
 
     return Object.entries(obj)
@@ -502,6 +519,7 @@ function render(filtered) {{
     let src={{}};
     let lvl={{}};
 
+    // Je cherche les skills directement dans les titres de poste
     let skills={{
         python:0,
         sql:0,
@@ -532,6 +550,7 @@ function render(filtered) {{
     const topComp = topEntries(comp);
     const topLoc = topEntries(loc);
 
+    // Graphique 1 : top entreprises
     Plotly.newPlot("c1",[{{
 
         x:shorten(topComp.map(x=>x[0])),
@@ -540,6 +559,7 @@ function render(filtered) {{
 
     }}],layout(),cfg);
 
+    // Graphique 2 : top localisations
     Plotly.newPlot("c2",[{{
 
         x:shorten(topLoc.map(x=>x[0])),
@@ -548,6 +568,7 @@ function render(filtered) {{
 
     }}],layout(),cfg);
 
+    // Graphique 3 : répartition des sources en donut
     Plotly.newPlot("c3",[{{
 
         labels:Object.keys(src),
@@ -557,6 +578,7 @@ function render(filtered) {{
 
     }}],layout(),cfg);
 
+    // Graphique 4 : niveaux d'expérience
     Plotly.newPlot("c4",[{{
 
         x:Object.keys(lvl),
@@ -565,6 +587,7 @@ function render(filtered) {{
 
     }}],layout(),cfg);
 
+    // Graphique 5 : skills détectés dans les titres
     Plotly.newPlot("c5",[{{
 
         x:Object.keys(skills),
@@ -573,6 +596,7 @@ function render(filtered) {{
 
     }}],layout(),cfg);
 
+    // Graphique 6 : histogramme de la longueur des titres
     Plotly.newPlot("c6",[{{
 
         x:filtered.map(d=>d.title.length),
@@ -580,6 +604,7 @@ function render(filtered) {{
 
     }}],layout(),cfg);
 
+    // Graphiques 7 & 8 : parts de marché top 5 entreprises et localisations
     Plotly.newPlot("c7",[{{
 
         labels:shorten(topComp.slice(0,5).map(x=>x[0])),
@@ -597,6 +622,7 @@ function render(filtered) {{
     }}],layout(),cfg);
 }}
 
+// Filtrage dynamique selon ville et entreprise sélectionnées
 function filterData() {{
 
     const city = document.getElementById("city").value;
@@ -615,6 +641,7 @@ function filterData() {{
     render(filtered);
 }}
 
+// Premier rendu au chargement de la page
 render(data);
 
 </script>
@@ -623,6 +650,7 @@ render(data);
 </html>
 """
 
+# Je génère le fichier HTML dans le même dossier que ce script
 output_path = os.path.join(BASE_DIR, "dashboard.html")
 
 with open(output_path, "w", encoding="utf-8") as f:

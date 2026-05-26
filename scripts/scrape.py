@@ -1,6 +1,7 @@
 import requests
 import pandas as pd
 
+# API publique Remotive, pas besoin de clé
 URL = "https://remotive.com/api/remote-jobs?category=data"
 
 def get_jobs():
@@ -12,6 +13,7 @@ def get_jobs():
 
     jobs = []
 
+    # Je récupère uniquement les champs dont j'ai besoin pour l'analyse
     for job in data.get("jobs", []):
         jobs.append({
             "title": job.get("title"),
@@ -26,6 +28,7 @@ def get_jobs():
 def save(jobs):
     df = pd.DataFrame(jobs)
 
+    # Je sauvegarde dans le dossier raw car ce sont des données brutes non traitées
     path = "data/raw/scrape_jobs.csv"
     df.to_csv(path, index=False)
 
